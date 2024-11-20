@@ -108,3 +108,23 @@ export const getVideosPublic = () => {
     method: 'get',
   })
 }
+
+// @Tags Videos
+// @Summary 上传视频
+// @Security ApiKeyAuth
+// @accept multipart/form-data
+// @Produce application/json
+// @Param userId formData string true "用户ID"
+// @Param file formData file true "视频文件"
+// @Success 200 {string} string "{"success":true,"data":{videoUrl: string},"msg":"上传成功"}"
+// @Router /videos/uploadVideos [post]
+export const uploadVideos = (data) => {
+  return service({
+    url: '/videos/uploadVideos',
+    method: 'post',
+    data,
+    headers: {
+      'Content-Type': 'multipart/form-data' // 重要：设置 Content-Type 为 multipart/form-data
+    }
+  })
+}

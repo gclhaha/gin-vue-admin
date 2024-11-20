@@ -23,29 +23,19 @@ type VideosApi struct{}
 // @Success 200 {object} response.Response{msg=string} "创建成功"
 // @Router /videos/createVideos [post]
 func (videosApi *VideosApi) CreateVideos(c *gin.Context) {
-	userId := c.PostForm("userId")
-	videoId := c.PostForm("videoId")
-	file, err := c.FormFile("file")
-
+	var videos leep.Videos
+	err := c.ShouldBindJSON(&videos)
 	if err != nil {
-		response.FailWithMessage(fmt.Sprintf("文件上传失败: %s", err.Error()), c)
+		response.FailWithMessage(err.Error(), c)
 		return
 	}
-
-	if userId == "" { // Ensure userId is provided
-		response.FailWithMessage("用户ID不能为空", c)
-		return
-	}
-
-	// Call the service function to handle the upload and database interaction
-	videoUrl, err := videosService.CreateVideos(userId, videoId, file)
+	err = videosService.CreateVideos(&videos)
 	if err != nil {
-		global.GVA_LOG.Error("创建失败!", zap.Error(err))
-		response.FailWithMessage("创建失败:"+err.Error(), c)
+        global.GVA_LOG.Error("创建失败!", zap.Error(err))
+		response.FailWithMessage("创建失败:" + err.Error(), c)
 		return
 	}
-
-	response.OkWithData(gin.H{"videoUrl": videoUrl}, c) // Return the videoUrl
+    response.OkWithMessage("创建成功", c)
 }
 
 // DeleteVideos 删除视频管理
@@ -177,4 +167,23 @@ func (videosApi *VideosApi) GetVideosPublic(c *gin.Context) {
 	response.OkWithDetailed(gin.H{
 		"info": "不需要鉴权的视频管理接口信息",
 	}, "获取成功", c)
+}
+
+
+// UploadVideos 处理文件上传请求
+func (videosApi *VideosApi) UploadVideos(c *gin.Context) {
+    file, err := c.FormFile("file")
+    if err != nil {
+        response.FailWithMessage(fmt.Sprintf("文件上传失败: %s", err.Error()), c)
+        return
+    }
+
+    videoUrl, err := videosService.UploadVideos(file)
+    if err != nil {
+        global.GVA_LOG.Error("上传失败!", zap.Error(err))
+        response.FailWithMessage("上传失败:"+err.Error(), c)
+        return
+    }
+
+    response.OkWithData(gin.H{"videoUrl": videoUrl}, c)
 }

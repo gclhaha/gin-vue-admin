@@ -5,67 +5,21 @@ import (
 	"io"
 	"mime/multipart"
 	"os"
-	"path"
+	"path/filepath"
 	"time"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/leep"
 	leepReq "github.com/flipped-aurora/gin-vue-admin/server/model/leep/request"
-	"github.com/google/uuid"
 )
 
 type VideosService struct{}
 
 // CreateVideos 创建视频管理记录
 // Author [yourname](https://github.com/yourname)
-func (videosService *VideosService) CreateVideos(userId, videoId string, file *multipart.FileHeader) (videoUrl string, err error) {
-	// Generate UUID for new videos only
-	if videoId == "" {
-		videoId = uuid.NewString()
-	}
-
-	filePath := fmt.Sprintf("./temp/%s/%s%s", userId, videoId, path.Ext(file.Filename))
-
-	// Create directory if it doesn't exist
-	err = os.MkdirAll(path.Dir(filePath), os.ModePerm)
-	if err != nil {
-		return "", fmt.Errorf("目录创建失败: %s", err.Error())
-	}
-
-	// Open the uploaded file
-	src, err := file.Open()
-	if err != nil {
-		return "", fmt.Errorf("打开文件失败: %w", err)
-	}
-	defer src.Close()
-
-	// Create the destination file
-	dst, err := os.Create(filePath)
-	if err != nil {
-		return "", fmt.Errorf("创建文件失败: %w", err)
-	}
-	defer dst.Close()
-
-	// Copy the uploaded file to the destination
-	_, err = io.Copy(dst, src) // Use io.Copy to efficiently copy the file
-	if err != nil {
-		return "", fmt.Errorf("复制文件失败: %w", err)
-	}
-
-	var videos leep.Videos
-	videos.Id = videoId
-	videos.UserId = userId
-	videos.VideoUrl = filePath // Store the relative path
-	videos.VideoType = "local"
-	videos.CreatedAt = &time.Time{}
-	videos.UpdatedAt = &time.Time{}
-
-	err = global.MustGetGlobalDBByDBName("leep").Create(&videos).Error
-	if err != nil {
-		return "", fmt.Errorf("数据库保存失败: %w", err)
-	}
-
-	return filePath, nil
+func (videosService *VideosService) CreateVideos(videos *leep.Videos) (err error) {
+	err = global.MustGetGlobalDBByDBName("leep").Create(videos).Error
+	return err
 }
 
 // DeleteVideos 删除视频管理记录
@@ -120,4 +74,42 @@ func (videosService *VideosService) GetVideosInfoList(info leepReq.VideosSearch)
 func (videosService *VideosService) GetVideosPublic() {
 	// 此方法为获取数据源定义的数据
 	// 请自行实现
+}
+
+// UploadVideos 上传视频文件
+func (videosService *VideosService) UploadVideos(file *multipart.FileHeader) (videoUrl string, err error) {
+	// 获取文件扩展名
+	fileExt := filepath.Ext(file.Filename)
+	// 使用时间戳创建新的文件名，避免文件名冲突
+	newFileName := fmt.Sprintf("%s-%d%s", file.Filename[0:len(file.Filename)-len(fileExt)], time.Now().Unix(), fileExt)
+
+	filePath := fmt.Sprintf("temp/%s", newFileName)
+
+	// 创建目录
+	err = os.MkdirAll(filepath.Dir(filePath), os.ModePerm)
+	if err != nil {
+		return "", fmt.Errorf("创建目录失败: %w", err)
+	}
+
+	// 打开上传的文件
+	src, err := file.Open()
+	if err != nil {
+		return "", fmt.Errorf("打开文件失败: %w", err)
+	}
+	defer src.Close()
+
+	// 创建目标文件
+	out, err := os.Create(filePath)
+	if err != nil {
+		return "", fmt.Errorf("创建文件失败: %w", err)
+	}
+	defer out.Close()
+
+	// 复制文件
+	_, err = io.Copy(out, src)
+	if err != nil {
+		return "", fmt.Errorf("复制文件失败: %w", err)
+	}
+
+	return "/" + filePath, nil // 返回相对路径，并添加前导斜杠
 }

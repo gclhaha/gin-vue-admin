@@ -80,8 +80,18 @@
             <el-form-item label="上传用户的ID:"  prop="userId" >
               <el-input v-model="formData.userId" :clearable="true"  placeholder="请输入上传用户的ID" />
             </el-form-item>
-            <el-form-item label="视频路径:"  prop="videoUrl" >
-              <el-input v-model="formData.videoUrl" :clearable="true"  placeholder="请输入视频路径" />
+            <el-form-item label="视频上传">
+              <el-upload
+              ref="uploadRef"
+              :file-list="fileList"
+              :before-upload="beforeUpload"
+              :http-request="uploadVideo"
+              :on-success="onUploadSuccess"
+              :on-error="onUploadError"    
+              >
+                <el-button size="small" type="primary">选择并上传</el-button>
+                <div slot="tip" class="el-upload__tip">只能上传视频文件，且不超过50MB</div>
+              </el-upload>
             </el-form-item>
             <el-form-item label="视频类型：local, aliyun, upyun:"  prop="videoType" >
               <el-input v-model="formData.videoType" :clearable="true"  placeholder="请输入视频类型：local, aliyun, upyun" />
@@ -128,7 +138,8 @@ import {
   deleteVideosByIds,
   updateVideos,
   findVideos,
-  getVideosList
+  getVideosList,
+  uploadVideos
 } from '@/api/leep/videos'
 
 // 全量引入格式化工具 请按需保留
@@ -136,8 +147,39 @@ import { getDictFunc, formatDate, formatBoolean, filterDict ,filterDataSource, r
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ref, reactive } from 'vue'
 
+const fileList = ref([])
+const uploadRef = ref(null)
 
+// 自定义上传函数
+const uploadVideo = async (param) => {
+  const form = new FormData()
+  form.append('file', param.file)
 
+  const res = await uploadVideos(form)
+  if (res.code === 0) {
+    ElMessage.success('上传成功')
+    console.log(res)
+    formData.value.videoUrl = res.data.videoUrl; // 设置返回的 URL
+  } else {
+    ElMessage.error('上传失败')
+  }
+}
+
+const beforeUpload = (file) => {
+  const isLt50M = file.size / 1024 / 1024 < 50;
+  const isVideo = ['video/mp4', 'video/avi', 'video/mov'].includes(file.type); // 仅允许 MP4, AVI, MOV 文件
+  if (!isLt50M) {
+    ElMessage.error('上传视频大小不能超过 50MB!');
+  } else if (!isVideo) {
+    ElMessage.error('请上传视频文件!');
+  }
+  return isLt50M && isVideo;
+};
+
+// 在移除文件前进行检查（可选，可以根据需要添加）
+const beforeRemove = (file, fileList) => {
+  return ElMessageBox.confirm('确定移除此文件？');
+};
 
 defineOptions({
     name: 'Videos'
@@ -331,6 +373,7 @@ const openDialog = () => {
 // 关闭弹窗
 const closeDialog = () => {
     dialogFormVisible.value = false
+    fileList.value = [];
     formData.value = {
         id: '',
         userId: '',

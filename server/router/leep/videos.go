@@ -17,6 +17,7 @@ func (s *VideosRouter) InitVideosRouter(Router *gin.RouterGroup,PublicRouter *gi
 		videosRouter.DELETE("deleteVideos", videosApi.DeleteVideos) // 删除视频管理
 		videosRouter.DELETE("deleteVideosByIds", videosApi.DeleteVideosByIds) // 批量删除视频管理
 		videosRouter.PUT("updateVideos", videosApi.UpdateVideos)    // 更新视频管理
+		videosRouter.POST("uploadVideos", videosApi.UploadVideos)	// 上传视频管理
 	}
 	{
 		videosRouterWithoutRecord.GET("findVideos", videosApi.FindVideos)        // 根据ID获取视频管理
