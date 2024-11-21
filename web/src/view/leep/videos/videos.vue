@@ -44,9 +44,10 @@
          </el-table-column>
         <el-table-column align="left" label="操作" fixed="right" min-width="240">
             <template #default="scope">
-            <el-button  type="primary" link class="table-button" @click="getDetails(scope.row)"><el-icon style="margin-right: 5px"><InfoFilled /></el-icon>查看详情</el-button>
-            <el-button  type="primary" link icon="edit" class="table-button" @click="updateVideosFunc(scope.row)">变更</el-button>
-            <el-button  type="primary" link icon="delete" @click="deleteRow(scope.row)">删除</el-button>
+              <el-button  type="primary" link class="table-button" @click="getDetails(scope.row)"><el-icon style="margin-right: 5px"><InfoFilled /></el-icon>查看详情</el-button>
+              <el-button  type="primary" link icon="edit" class="table-button" @click="updateVideosFunc(scope.row)">变更</el-button>
+              <el-button  type="primary" link icon="delete" @click="deleteRow(scope.row)">删除</el-button>
+              <el-button  type="primary" style="margin-left: 10px;" @click="openMarkManagerDialog(scope.row)">标记管理</el-button>
             </template>
         </el-table-column>
         </el-table>
@@ -127,7 +128,45 @@
                     </el-descriptions-item>
             </el-descriptions>
         </el-drawer>
-
+    <!-- 标记管理 Dialog -->
+    <el-dialog
+      v-model="markManagerDialogVisible"
+        :width="'80%'"
+        :top="'10vh'"
+        :close-on-click-modal="false"
+          >
+        <template #hdeader>标记管理</template>
+        <template #default>
+          <div style="display: flex; flex-direction: column; align-items: center;">
+            <!-- 视频框 -->
+            <div style="margin-bottom: 20px; width: 100%; display: flex; justify-content: center;">
+          <video
+            v-if="videoSrc"
+            :src="videoSrc"
+            controls
+            style="width: 80%; background: black;"
+          />
+          <el-skeleton
+            v-else
+            :rows="3"
+            :loading="loading"
+            animated
+          >
+            <template #template>
+              <div style="width: 80%; aspect-ratio: 16 / 9; background: #f0f2f5;" />
+            </template>
+          </el-skeleton>
+            </div>
+            <!-- 其他内容 -->
+            <div style="text-align: center;">
+          <p>标记管理功能可以扩展。</p>
+            </div>
+          </div>
+        </template>
+      <template #footer>
+        <el-button @click="markManagerDialogVisible = false">关闭</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -139,7 +178,8 @@ import {
   updateVideos,
   findVideos,
   getVideosList,
-  uploadVideos
+  uploadVideos,
+  loadVideo
 } from '@/api/leep/videos'
 
 // 全量引入格式化工具 请按需保留
@@ -150,6 +190,30 @@ import { ref, reactive } from 'vue'
 const fileList = ref([])
 const uploadRef = ref(null)
 
+// 控制标记管理对话框的显示
+const markManagerDialogVisible = ref(false);
+
+// 视频源和加载状态
+const videoSrc = ref("");
+
+// 打开标记管理 Dialog
+const openMarkManagerDialog = async (row) => {
+  try {
+    // 加载视频流
+    const videoResponse = await loadVideo(row.videoUrl);
+    console.log(videoResponse)
+    if (videoResponse.status === 200) {
+      markManagerDialogVisible.value = true;
+      const videoBlob = new Blob([videoResponse.data], { type: "video/mp4" });
+      videoSrc.value = URL.createObjectURL(videoBlob);
+    } else {
+      ElMessage.error("加载视频失败！");
+    }
+  } catch (error) {
+    ElMessage.error("操作失败，请稍后重试！");
+  }
+};
+
 // 自定义上传函数
 const uploadVideo = async (param) => {
   const form = new FormData()
@@ -158,7 +222,6 @@ const uploadVideo = async (param) => {
   const res = await uploadVideos(form)
   if (res.code === 0) {
     ElMessage.success('上传成功')
-    console.log(res)
     formData.value.videoUrl = res.data.videoUrl; // 设置返回的 URL
   } else {
     ElMessage.error('上传失败')

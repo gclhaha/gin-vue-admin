@@ -2,6 +2,8 @@ package leep
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
@@ -31,11 +33,11 @@ func (videosApi *VideosApi) CreateVideos(c *gin.Context) {
 	}
 	err = videosService.CreateVideos(&videos)
 	if err != nil {
-        global.GVA_LOG.Error("创建失败!", zap.Error(err))
-		response.FailWithMessage("创建失败:" + err.Error(), c)
+		global.GVA_LOG.Error("创建失败!", zap.Error(err))
+		response.FailWithMessage("创建失败:"+err.Error(), c)
 		return
 	}
-    response.OkWithMessage("创建成功", c)
+	response.OkWithMessage("创建成功", c)
 }
 
 // DeleteVideos 删除视频管理
@@ -169,21 +171,57 @@ func (videosApi *VideosApi) GetVideosPublic(c *gin.Context) {
 	}, "获取成功", c)
 }
 
-
 // UploadVideos 处理文件上传请求
 func (videosApi *VideosApi) UploadVideos(c *gin.Context) {
-    file, err := c.FormFile("file")
-    if err != nil {
-        response.FailWithMessage(fmt.Sprintf("文件上传失败: %s", err.Error()), c)
-        return
-    }
+	file, err := c.FormFile("file")
+	if err != nil {
+		response.FailWithMessage(fmt.Sprintf("文件上传失败: %s", err.Error()), c)
+		return
+	}
 
-    videoUrl, err := videosService.UploadVideos(file)
-    if err != nil {
-        global.GVA_LOG.Error("上传失败!", zap.Error(err))
-        response.FailWithMessage("上传失败:"+err.Error(), c)
-        return
-    }
+	videoUrl, err := videosService.UploadVideos(file)
+	if err != nil {
+		global.GVA_LOG.Error("上传失败!", zap.Error(err))
+		response.FailWithMessage("上传失败:"+err.Error(), c)
+		return
+	}
 
-    response.OkWithData(gin.H{"videoUrl": videoUrl}, c)
+	response.OkWithData(gin.H{"videoUrl": videoUrl}, c)
+}
+
+// LoadVideo 加载视频
+// @Tags Videos
+// @Summary 加载视频
+// @accept application/json
+// @Produce application/json
+// @Param data query leepReq.VideosSearch true "成功"
+// @Success 200 {object} response.Response{data=object,msg=string} "成功"
+// @Router /videos/loadVideo [GET]
+func (videosApi *VideosApi) LoadVideo(c *gin.Context) {
+	videoUrl := c.Query("videoUrl")
+	if videoUrl == "" {
+		response.FailWithMessage("视频路径不能为空", c)
+		return
+	}
+
+	// 获取当前项目路径
+	currentDir, err := os.Getwd()
+	if err != nil {
+		global.GVA_LOG.Error("获取当前路径失败!", zap.Error(err))
+		response.FailWithMessage("获取当前路径失败", c)
+		return
+	}
+
+	// 拼接视频路径
+	videoPath := filepath.Join(currentDir, videoUrl)
+
+	// 检查文件是否存在
+	if _, err := os.Stat(videoPath); os.IsNotExist(err) {
+		global.GVA_LOG.Error("视频文件不存在!", zap.String("videoPath", videoPath), zap.Error(err))
+		response.FailWithMessage("视频文件不存在", c)
+		return
+	}
+
+	// 使用 http.ServeFile 提供文件下载，更简洁和安全
+	c.File(videoPath)
 }

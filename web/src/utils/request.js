@@ -72,6 +72,19 @@ service.interceptors.response.use(
     if (response.headers['new-token']) {
       userStore.setToken(response.headers['new-token'])
     }
+
+    // 处理文件流响应
+    const contentType = response.headers['content-type']
+    if (contentType && (
+      contentType.includes('application/octet-stream') || 
+      contentType.includes('application/vnd') ||
+      contentType.includes('image/') ||
+      contentType.includes('video/') ||
+      contentType.includes('audio/')
+    )) {
+      return response
+    }
+
     if (response.data.code === 0 || response.headers.success === 'true') {
       if (response.headers.msg) {
         response.data.msg = decodeURI(response.headers.msg)

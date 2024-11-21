@@ -1,4 +1,4 @@
-import service from '@/utils/request'
+import service from "@/utils/request";
 // @Tags Videos
 // @Summary 创建视频管理
 // @Security ApiKeyAuth
@@ -9,11 +9,11 @@ import service from '@/utils/request'
 // @Router /videos/createVideos [post]
 export const createVideos = (data) => {
   return service({
-    url: '/videos/createVideos',
-    method: 'post',
-    data
-  })
-}
+    url: "/videos/createVideos",
+    method: "post",
+    data,
+  });
+};
 
 // @Tags Videos
 // @Summary 删除视频管理
@@ -25,11 +25,11 @@ export const createVideos = (data) => {
 // @Router /videos/deleteVideos [delete]
 export const deleteVideos = (params) => {
   return service({
-    url: '/videos/deleteVideos',
-    method: 'delete',
-    params
-  })
-}
+    url: "/videos/deleteVideos",
+    method: "delete",
+    params,
+  });
+};
 
 // @Tags Videos
 // @Summary 批量删除视频管理
@@ -41,11 +41,11 @@ export const deleteVideos = (params) => {
 // @Router /videos/deleteVideos [delete]
 export const deleteVideosByIds = (params) => {
   return service({
-    url: '/videos/deleteVideosByIds',
-    method: 'delete',
-    params
-  })
-}
+    url: "/videos/deleteVideosByIds",
+    method: "delete",
+    params,
+  });
+};
 
 // @Tags Videos
 // @Summary 更新视频管理
@@ -57,11 +57,11 @@ export const deleteVideosByIds = (params) => {
 // @Router /videos/updateVideos [put]
 export const updateVideos = (data) => {
   return service({
-    url: '/videos/updateVideos',
-    method: 'put',
-    data
-  })
-}
+    url: "/videos/updateVideos",
+    method: "put",
+    data,
+  });
+};
 
 // @Tags Videos
 // @Summary 用id查询视频管理
@@ -73,11 +73,11 @@ export const updateVideos = (data) => {
 // @Router /videos/findVideos [get]
 export const findVideos = (params) => {
   return service({
-    url: '/videos/findVideos',
-    method: 'get',
-    params
-  })
-}
+    url: "/videos/findVideos",
+    method: "get",
+    params,
+  });
+};
 
 // @Tags Videos
 // @Summary 分页获取视频管理列表
@@ -89,11 +89,11 @@ export const findVideos = (params) => {
 // @Router /videos/getVideosList [get]
 export const getVideosList = (params) => {
   return service({
-    url: '/videos/getVideosList',
-    method: 'get',
-    params
-  })
-}
+    url: "/videos/getVideosList",
+    method: "get",
+    params,
+  });
+};
 
 // @Tags Videos
 // @Summary 不需要鉴权的视频管理接口
@@ -104,10 +104,10 @@ export const getVideosList = (params) => {
 // @Router /videos/getVideosPublic [get]
 export const getVideosPublic = () => {
   return service({
-    url: '/videos/getVideosPublic',
-    method: 'get',
-  })
-}
+    url: "/videos/getVideosPublic",
+    method: "get",
+  });
+};
 
 // @Tags Videos
 // @Summary 上传视频
@@ -120,11 +120,28 @@ export const getVideosPublic = () => {
 // @Router /videos/uploadVideos [post]
 export const uploadVideos = (data) => {
   return service({
-    url: '/videos/uploadVideos',
-    method: 'post',
+    url: "/videos/uploadVideos",
+    method: "post",
     data,
     headers: {
-      'Content-Type': 'multipart/form-data' // 重要：设置 Content-Type 为 multipart/form-data
-    }
+      "Content-Type": "multipart/form-data", // 重要：设置 Content-Type 为 multipart/form-data
+    },
+  });
+};
+
+
+// LoadVideo 加载视频
+// @Tags Videos
+// @Summary 加载视频
+// @accept application/json
+// @Produce application/json
+// @Success 200 {object} response.Response{data=object,msg=string} "成功"
+// @Router /videos/loadVideo [GET]
+export const loadVideo = (videoUrl) => {
+  return service({
+    url: '/videos/loadVideo',
+    method: 'GET',
+    params: { videoUrl },
+    responseType: 'blob',
   })
 }

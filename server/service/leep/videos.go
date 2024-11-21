@@ -113,3 +113,12 @@ func (videosService *VideosService) UploadVideos(file *multipart.FileHeader) (vi
 
 	return "/" + filePath, nil // 返回相对路径，并添加前导斜杠
 }
+
+// LoadVideo 加载视频
+// Author [yourname](https://github.com/yourname)
+func (videosService *VideosService)LoadVideo() (err error) {
+	// 请在这里实现自己的业务逻辑
+	db := global.MustGetGlobalDBByDBName("leep").Model(&leep.Videos{})
+    return db.Error
+}
+
