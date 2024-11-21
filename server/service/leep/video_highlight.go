@@ -1,6 +1,8 @@
 package leep
 
 import (
+	"strings"
+	"github.com/google/uuid"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/leep"
     leepReq "github.com/flipped-aurora/gin-vue-admin/server/model/leep/request"
@@ -10,14 +12,17 @@ type VideoHighlightService struct {}
 // CreateVideoHighlight 创建视频高光记录
 // Author [yourname](https://github.com/yourname)
 func (videoHighlightService *VideoHighlightService) CreateVideoHighlight(videoHighlight *leep.VideoHighlight) (err error) {
+	videoHighlight.Id = strings.Replace(uuid.New().String(), "-", "", -1)
 	err = global.MustGetGlobalDBByDBName("leep").Create(videoHighlight).Error
 	return err
 }
 
 // DeleteVideoHighlight 删除视频高光记录
 // Author [yourname](https://github.com/yourname)
-func (videoHighlightService *VideoHighlightService)DeleteVideoHighlight(id string) (err error) {
-	err = global.MustGetGlobalDBByDBName("leep").Delete(&leep.VideoHighlight{},"id = ?",id).Error
+func (videoHighlightService *VideoHighlightService)DeleteVideoHighlight(id string, videoId string, userId string) (err error) {
+	err = global.MustGetGlobalDBByDBName("leep").
+		Where("id = ? AND video_id = ? AND user_id = ?", id, videoId, userId).
+		Delete(&leep.VideoHighlight{}).Error
 	return err
 }
 
@@ -31,14 +36,19 @@ func (videoHighlightService *VideoHighlightService)DeleteVideoHighlightByIds(ids
 // UpdateVideoHighlight 更新视频高光记录
 // Author [yourname](https://github.com/yourname)
 func (videoHighlightService *VideoHighlightService)UpdateVideoHighlight(videoHighlight leep.VideoHighlight) (err error) {
-	err = global.MustGetGlobalDBByDBName("leep").Model(&leep.VideoHighlight{}).Where("id = ?",videoHighlight.Id).Updates(&videoHighlight).Error
+	err = global.MustGetGlobalDBByDBName("leep").Model(&leep.VideoHighlight{}).
+		Where("id = ? AND video_id = ? AND user_id = ?", 
+			videoHighlight.Id, videoHighlight.VideoId, videoHighlight.UserId).
+		Updates(&videoHighlight).Error
 	return err
 }
 
 // GetVideoHighlight 根据id获取视频高光记录
 // Author [yourname](https://github.com/yourname)
-func (videoHighlightService *VideoHighlightService)GetVideoHighlight(id string) (videoHighlight leep.VideoHighlight, err error) {
-	err = global.MustGetGlobalDBByDBName("leep").Where("id = ?", id).First(&videoHighlight).Error
+func (videoHighlightService *VideoHighlightService)GetVideoHighlight(id string, videoId string, userId string) (videoHighlight leep.VideoHighlight, err error) {
+	err = global.MustGetGlobalDBByDBName("leep").
+		Where("id = ? AND video_id = ? AND user_id = ?", id, videoId, userId).
+		First(&videoHighlight).Error
 	return
 }
 
@@ -49,6 +59,15 @@ func (videoHighlightService *VideoHighlightService)GetVideoHighlightInfoList(inf
 	offset := info.PageSize * (info.Page - 1)
     // 创建db
 	db := global.MustGetGlobalDBByDBName("leep").Model(&leep.VideoHighlight{})
+    
+    // 添加视频ID和用户ID的查询条件
+    if info.VideoId != "" {
+        db = db.Where("video_id = ?", info.VideoId)
+    }
+    if info.UserId != "" {
+        db = db.Where("user_id = ?", info.UserId)
+    }
+    
     var videoHighlights []leep.VideoHighlight
     // 如果有条件搜索 下方会自动创建搜索语句
 	err = db.Count(&total).Error

@@ -6,11 +6,13 @@ import (
 	"mime/multipart"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/leep"
 	leepReq "github.com/flipped-aurora/gin-vue-admin/server/model/leep/request"
+	"github.com/google/uuid"
 )
 
 type VideosService struct{}
@@ -18,6 +20,7 @@ type VideosService struct{}
 // CreateVideos 创建视频管理记录
 // Author [yourname](https://github.com/yourname)
 func (videosService *VideosService) CreateVideos(videos *leep.Videos) (err error) {
+	videos.Id = strings.Replace(uuid.New().String(), "-", "", -1)
 	err = global.MustGetGlobalDBByDBName("leep").Create(videos).Error
 	return err
 }

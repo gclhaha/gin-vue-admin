@@ -93,12 +93,14 @@ const formatTime = (seconds) => {
   return `${mins}:${secs.toString().padStart(2, '0')}`
 }
 
+// 修改加载高光列表的方法
 const loadHighlights = async () => {
   try {
     const response = await getVideoHighlightList({
       page: 1,
       pageSize: 50,
-      videoId: props.videoId
+      videoId: props.videoId,
+      userId: props.userId
     })
     if (response.code === 0) {
       highlights.value = response.data.list
@@ -152,9 +154,15 @@ const rules = {
 
 const formRef = ref(null)
 
+// 修改保存高光的方法，确保包含 videoId 和 userId
 const saveHighlight = async () => {
   try {
     await formRef.value.validate()
+    
+    // 确保表单数据包含视频ID和用户ID
+    highlightForm.value.videoId = props.videoId
+    highlightForm.value.userId = props.userId
+    
     if (isEdit.value) {
       await updateVideoHighlight(highlightForm.value)
     } else {
@@ -170,10 +178,15 @@ const saveHighlight = async () => {
   }
 }
 
+// 修改删除高光的方法，确保包含 videoId 和 userId
 const deleteHighlight = async (row) => {
   try {
     await ElMessageBox.confirm('确定要删除这个高光片段吗？')
-    await deleteVideoHighlight({ id: row.id })
+    await deleteVideoHighlight({ 
+      id: row.id,
+      videoId: props.videoId,
+      userId: props.userId
+    })
     ElMessage.success('删除成功')
     loadHighlights()
   } catch (error) {

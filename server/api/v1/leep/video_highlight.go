@@ -49,14 +49,16 @@ func (videoHighlightApi *VideoHighlightApi) CreateVideoHighlight(c *gin.Context)
 // @Success 200 {object} response.Response{msg=string} "删除成功"
 // @Router /videoHighlight/deleteVideoHighlight [delete]
 func (videoHighlightApi *VideoHighlightApi) DeleteVideoHighlight(c *gin.Context) {
-	id := c.Query("id")
-	err := videoHighlightService.DeleteVideoHighlight(id)
-	if err != nil {
+    id := c.Query("id")
+    videoId := c.Query("videoId")
+    userId := c.Query("userId")
+    err := videoHighlightService.DeleteVideoHighlight(id, videoId, userId)
+    if err != nil {
         global.GVA_LOG.Error("删除失败!", zap.Error(err))
-		response.FailWithMessage("删除失败:" + err.Error(), c)
-		return
-	}
-	response.OkWithMessage("删除成功", c)
+        response.FailWithMessage("删除失败:" + err.Error(), c)
+        return
+    }
+    response.OkWithMessage("删除成功", c)
 }
 
 // DeleteVideoHighlightByIds 批量删除视频高光
@@ -113,14 +115,16 @@ func (videoHighlightApi *VideoHighlightApi) UpdateVideoHighlight(c *gin.Context)
 // @Success 200 {object} response.Response{data=leep.VideoHighlight,msg=string} "查询成功"
 // @Router /videoHighlight/findVideoHighlight [get]
 func (videoHighlightApi *VideoHighlightApi) FindVideoHighlight(c *gin.Context) {
-	id := c.Query("id")
-	revideoHighlight, err := videoHighlightService.GetVideoHighlight(id)
-	if err != nil {
+    id := c.Query("id")
+    videoId := c.Query("videoId")
+    userId := c.Query("userId")
+    revideoHighlight, err := videoHighlightService.GetVideoHighlight(id, videoId, userId)
+    if err != nil {
         global.GVA_LOG.Error("查询失败!", zap.Error(err))
-		response.FailWithMessage("查询失败:" + err.Error(), c)
-		return
-	}
-	response.OkWithData(revideoHighlight, c)
+        response.FailWithMessage("查询失败:" + err.Error(), c)
+        return
+    }
+    response.OkWithData(revideoHighlight, c)
 }
 
 // GetVideoHighlightList 分页获取视频高光列表
@@ -142,7 +146,7 @@ func (videoHighlightApi *VideoHighlightApi) GetVideoHighlightList(c *gin.Context
 	list, total, err := videoHighlightService.GetVideoHighlightInfoList(pageInfo)
 	if err != nil {
 	    global.GVA_LOG.Error("获取失败!", zap.Error(err))
-        response.FailWithMessage("获取失败:" + err.Error(), c)
+        response.FailWithMessage("获取���败:" + err.Error(), c)
         return
     }
     response.OkWithDetailed(response.PageResult{

@@ -144,6 +144,7 @@
         :width="'80%'"
         :top="'10vh'"
         :close-on-click-modal="false"
+        :before-close="closeMarkManagerDialog"
           >
         <template #hdeader>标记管理</template>
         <template #default>
@@ -267,7 +268,7 @@ defineOptions({
     name: 'Videos'
 })
 
-// 控制更多查询条件显示/隐藏状态
+// 控制更多查询条件显示/���藏状态
 const showAllQuery = ref(false)
 
 // 自动化生成的字典（可能为空）以及字段
@@ -535,6 +536,15 @@ const closeMarkManagerDialog = () => {
   markManagerDialogVisible.value = false
   videoSrc.value = ""
   currentVideo.value = null
+  // 如果视频有在播放，停止播放
+  if (videoRef.value) {
+    videoRef.value.pause()
+    videoRef.value.currentTime = 0
+  }
+  // 释放视频Blob URL
+  if (videoSrc.value.startsWith('blob:')) {
+    URL.revokeObjectURL(videoSrc.value)
+  }
 }
 
 const getVideoName = (url) => {
