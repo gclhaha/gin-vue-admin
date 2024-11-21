@@ -1,3 +1,4 @@
+
 <template>
   <div>
     <div class="gva-search-box">
@@ -31,33 +32,23 @@
         >
         <el-table-column type="selection" width="55" />
         
-          <el-table-column align="left" label="视频ID" prop="id" width="120" v-if="false" />
-          <el-table-column align="left" label="用户ID" prop="userId" width="120" />
-          <el-table-column align="left" label="视频路径" prop="videoUrl" min-width="300">
-            <template #default="scope">
-              <el-tooltip
-                class="box-item"
-                effect="dark"
-                :content="scope.row.videoUrl"
-                placement="top-start"
-              >
-                <div class="video-url-cell">{{ scope.row.videoUrl }}</div>
-              </el-tooltip>
-            </template>
-          </el-table-column>
-          <el-table-column align="left" label="视频类型" prop="videoType" width="120" />
+          <el-table-column align="left" label="id字段" prop="id" width="120" />
+          <el-table-column align="left" label="视频 ID" prop="videoId" width="120" />
+          <el-table-column align="left" label="用户 ID" prop="userId" width="120" />
+          <el-table-column align="left" label="高光片段的开始时间，以秒为单位" prop="highlightStartTime" width="120" />
+          <el-table-column align="left" label="高光片段的结束时间，以秒为单位" prop="highlightEndTime" width="120" />
+          <el-table-column align="left" label="高光类型，用于分类或标识高光的属性" prop="highlightType" width="120" />
          <el-table-column align="left" label="创建时间" prop="createdAt" width="180">
             <template #default="scope">{{ formatDate(scope.row.createdAt) }}</template>
          </el-table-column>
          <el-table-column align="left" label="更新时间" prop="updatedAt" width="180">
             <template #default="scope">{{ formatDate(scope.row.updatedAt) }}</template>
          </el-table-column>
-        <el-table-column align="left" label="操作" fixed="right" min-width="360">
+        <el-table-column align="left" label="操作" fixed="right" min-width="240">
             <template #default="scope">
-              <el-button  type="primary" link class="table-button" @click="getDetails(scope.row)"><el-icon style="margin-right: 5px"><InfoFilled /></el-icon>查看详情</el-button>
-              <el-button  type="primary" link icon="edit" class="table-button" @click="updateVideosFunc(scope.row)">变更</el-button>
-              <el-button  type="primary" link icon="delete" @click="deleteRow(scope.row)">删除</el-button>
-              <el-button  type="primary" style="margin-left: 10px;" @click="openMarkManagerDialog(scope.row)">标记管理</el-button>
+            <el-button  type="primary" link class="table-button" @click="getDetails(scope.row)"><el-icon style="margin-right: 5px"><InfoFilled /></el-icon>查看详情</el-button>
+            <el-button  type="primary" link icon="edit" class="table-button" @click="updateVideoHighlightFunc(scope.row)">变更</el-button>
+            <el-button  type="primary" link icon="delete" @click="deleteRow(scope.row)">删除</el-button>
             </template>
         </el-table-column>
         </el-table>
@@ -85,27 +76,23 @@
             </template>
 
           <el-form :model="formData" label-position="top" ref="elFormRef" :rules="rule" label-width="80px">
-            <el-form-item label="视频ID，UUID:"  prop="id" >
-              <el-input v-model="formData.id" :clearable="true"  placeholder="请输入视频ID，UUID" />
+            <el-form-item label="id字段:"  prop="id" >
+              <el-input v-model="formData.id" :clearable="true"  placeholder="请输入id字段" />
             </el-form-item>
-            <el-form-item label="上传用户的ID:"  prop="userId" >
-              <el-input v-model="formData.userId" :clearable="true"  placeholder="请输入上传用户的ID" />
+            <el-form-item label="视频 ID:"  prop="videoId" >
+              <el-input v-model="formData.videoId" :clearable="true"  placeholder="请输入视频 ID" />
             </el-form-item>
-            <el-form-item label="视频上传">
-              <el-upload
-              ref="uploadRef"
-              :file-list="fileList"
-              :before-upload="beforeUpload"
-              :http-request="uploadVideo"
-              :on-success="onUploadSuccess"
-              :on-error="onUploadError"    
-              >
-                <el-button size="small" type="primary">选择并上传</el-button>
-                <div slot="tip" class="el-upload__tip">只能上传视频文件，且不超过50MB</div>
-              </el-upload>
+            <el-form-item label="用户 ID:"  prop="userId" >
+              <el-input v-model="formData.userId" :clearable="true"  placeholder="请输入用户 ID" />
             </el-form-item>
-            <el-form-item label="视频类型：local, aliyun, upyun:"  prop="videoType" >
-              <el-input v-model="formData.videoType" :clearable="true"  placeholder="请输入视频类型：local, aliyun, upyun" />
+            <el-form-item label="高光片段的开始时间，以秒为单位:"  prop="highlightStartTime" >
+              <el-input v-model.number="formData.highlightStartTime" :clearable="true" placeholder="请输入高光片段的开始时间，以秒为单位" />
+            </el-form-item>
+            <el-form-item label="高光片段的结束时间，以秒为单位:"  prop="highlightEndTime" >
+              <el-input v-model.number="formData.highlightEndTime" :clearable="true" placeholder="请输入高光片段的结束时间，以秒为单位" />
+            </el-form-item>
+            <el-form-item label="高光类型，用于分类或标识高光的属性:"  prop="highlightType" >
+              <el-input v-model="formData.highlightType" :clearable="true"  placeholder="请输入高光类型，用于分类或标识高光的属性" />
             </el-form-item>
             <el-form-item label="创建时间:"  prop="createdAt" >
               <el-date-picker v-model="formData.createdAt" type="date" style="width:100%" placeholder="选择日期" :clearable="true"  />
@@ -118,17 +105,23 @@
 
     <el-drawer destroy-on-close size="800" v-model="detailShow" :show-close="true" :before-close="closeDetailShow">
             <el-descriptions :column="1" border>
-                    <el-descriptions-item label="视频ID，UUID">
+                    <el-descriptions-item label="id字段">
                         {{ detailFrom.id }}
                     </el-descriptions-item>
-                    <el-descriptions-item label="上传用户的ID">
+                    <el-descriptions-item label="视频 ID">
+                        {{ detailFrom.videoId }}
+                    </el-descriptions-item>
+                    <el-descriptions-item label="用户 ID">
                         {{ detailFrom.userId }}
                     </el-descriptions-item>
-                    <el-descriptions-item label="视频路径">
-                        {{ detailFrom.videoUrl }}
+                    <el-descriptions-item label="高光片段的开始时间，以秒为单位">
+                        {{ detailFrom.highlightStartTime }}
                     </el-descriptions-item>
-                    <el-descriptions-item label="视频类型：local, aliyun, upyun">
-                        {{ detailFrom.videoType }}
+                    <el-descriptions-item label="高光片段的结束时间，以秒为单位">
+                        {{ detailFrom.highlightEndTime }}
+                    </el-descriptions-item>
+                    <el-descriptions-item label="高光类型，用于分类或标识高光的属性">
+                        {{ detailFrom.highlightType }}
                     </el-descriptions-item>
                     <el-descriptions-item label="创建时间">
                         {{ detailFrom.createdAt }}
@@ -138,133 +131,30 @@
                     </el-descriptions-item>
             </el-descriptions>
         </el-drawer>
-    <!-- 标记管理 Dialog -->
-    <el-dialog
-      v-model="markManagerDialogVisible"
-        :width="'80%'"
-        :top="'10vh'"
-        :close-on-click-modal="false"
-          >
-        <template #hdeader>标记管理</template>
-        <template #default>
-          <div style="display: flex; flex-direction: column; align-items: center;">
-            <!-- 视频框 -->
-            <div style="margin-bottom: 20px; width: 100%; display: flex; justify-content: center;">
-              <video
-                ref="videoRef"
-                v-if="videoSrc"
-                :src="videoSrc"
-                controls
-                style="width: 80%; background: black;"
-              />
-              <el-skeleton
-                v-else
-                :rows="3"
-                :loading="loading"
-                animated
-              >
-                <template #template>
-                  <div style="width: 80%; aspect-ratio: 16 / 9; background: #f0f2f5;" />
-                </template>
-              </el-skeleton>
-            </div>
-            <!-- 高光列表组件 -->
-            <video-highlight-list
-              v-if="videoSrc"
-              :video-id="currentVideo?.id"
-              :user-id="currentVideo?.userId"
-              :video-ref="videoRef?.value"
-              @highlight-play="playHighlight"
-            />
-          </div>
-        </template>
-      <template #footer>
-        <el-button @click="markManagerDialogVisible = false">关闭</el-button>
-      </template>
-    </el-dialog>
+
   </div>
 </template>
 
 <script setup>
 import {
-  createVideos,
-  deleteVideos,
-  deleteVideosByIds,
-  updateVideos,
-  findVideos,
-  getVideosList,
-  uploadVideos,
-  loadVideo
-} from '@/api/leep/videos'
+  createVideoHighlight,
+  deleteVideoHighlight,
+  deleteVideoHighlightByIds,
+  updateVideoHighlight,
+  findVideoHighlight,
+  getVideoHighlightList
+} from '@/api/leep/videoHighlight'
 
 // 全量引入格式化工具 请按需保留
 import { getDictFunc, formatDate, formatBoolean, filterDict ,filterDataSource, returnArrImg, onDownloadFile } from '@/utils/format'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ref, reactive } from 'vue'
-import VideoHighlightList from '@/components/VideoHighlightList.vue'
 
-const fileList = ref([])
-const uploadRef = ref(null)
 
-// 控制标记管理对话框的显示
-const markManagerDialogVisible = ref(false);
 
-// 视频源和加载状态
-const videoSrc = ref("");
-
-// 添加视频引用
-const videoRef = ref(null)
-const currentVideo = ref(null)
-
-// 打开标记管理 Dialog
-const openMarkManagerDialog = async (row) => {
-  try {
-    currentVideo.value = row
-    const videoResponse = await loadVideo(row.videoUrl)
-    if (videoResponse.status === 200) {
-      markManagerDialogVisible.value = true
-      const videoBlob = new Blob([videoResponse.data], { type: "video/mp4" })
-      videoSrc.value = URL.createObjectURL(videoBlob)
-    } else {
-      ElMessage.error("加载视频失败！")
-    }
-  } catch (error) {
-    ElMessage.error("操作失败，请稍后重试！")
-  }
-}
-
-// 自定义上传函数
-const uploadVideo = async (param) => {
-  const form = new FormData()
-  form.append('file', param.file)
-
-  const res = await uploadVideos(form)
-  if (res.code === 0) {
-    ElMessage.success('上传成功')
-    formData.value.videoUrl = res.data.videoUrl; // 设置返回的 URL
-  } else {
-    ElMessage.error('上传失败')
-  }
-}
-
-const beforeUpload = (file) => {
-  const isLt50M = file.size / 1024 / 1024 < 50;
-  const isVideo = ['video/mp4', 'video/avi', 'video/mov'].includes(file.type); // 仅允许 MP4, AVI, MOV 文件
-  if (!isLt50M) {
-    ElMessage.error('上传视频大小不能超过 50MB!');
-  } else if (!isVideo) {
-    ElMessage.error('请上传视频文件!');
-  }
-  return isLt50M && isVideo;
-};
-
-// 在移除文件前进行检查（可选，可以根据需要添加）
-const beforeRemove = (file, fileList) => {
-  return ElMessageBox.confirm('确定移除此文件？');
-};
 
 defineOptions({
-    name: 'Videos'
+    name: 'VideoHighlight'
 })
 
 // 控制更多查询条件显示/隐藏状态
@@ -273,9 +163,11 @@ const showAllQuery = ref(false)
 // 自动化生成的字典（可能为空）以及字段
 const formData = ref({
             id: '',
+            videoId: '',
             userId: '',
-            videoUrl: '',
-            videoType: '',
+            highlightStartTime: undefined,
+            highlightEndTime: undefined,
+            highlightType: '',
             createdAt: new Date(),
             updatedAt: new Date(),
         })
@@ -328,7 +220,7 @@ const onSubmit = () => {
   })
 }
 
-// ���页
+// 分页
 const handleSizeChange = (val) => {
   pageSize.value = val
   getTableData()
@@ -342,7 +234,7 @@ const handleCurrentChange = (val) => {
 
 // 查询
 const getTableData = async() => {
-  const table = await getVideosList({ page: page.value, pageSize: pageSize.value, ...searchInfo.value })
+  const table = await getVideoHighlightList({ page: page.value, pageSize: pageSize.value, ...searchInfo.value })
   if (table.code === 0) {
     tableData.value = table.data.list
     total.value = table.data.total
@@ -377,7 +269,7 @@ const deleteRow = (row) => {
         cancelButtonText: '取消',
         type: 'warning'
     }).then(() => {
-            deleteVideosFunc(row)
+            deleteVideoHighlightFunc(row)
         })
     }
 
@@ -400,7 +292,7 @@ const onDelete = async() => {
         multipleSelection.value.map(item => {
           ids.push(item.id)
         })
-      const res = await deleteVideosByIds({ ids })
+      const res = await deleteVideoHighlightByIds({ ids })
       if (res.code === 0) {
         ElMessage({
           type: 'success',
@@ -418,8 +310,8 @@ const onDelete = async() => {
 const type = ref('')
 
 // 更新行
-const updateVideosFunc = async(row) => {
-    const res = await findVideos({ id: row.id })
+const updateVideoHighlightFunc = async(row) => {
+    const res = await findVideoHighlight({ id: row.id })
     type.value = 'update'
     if (res.code === 0) {
         formData.value = res.data
@@ -429,8 +321,8 @@ const updateVideosFunc = async(row) => {
 
 
 // 删除行
-const deleteVideosFunc = async (row) => {
-    const res = await deleteVideos({ id: row.id })
+const deleteVideoHighlightFunc = async (row) => {
+    const res = await deleteVideoHighlight({ id: row.id })
     if (res.code === 0) {
         ElMessage({
                 type: 'success',
@@ -455,12 +347,13 @@ const openDialog = () => {
 // 关闭弹窗
 const closeDialog = () => {
     dialogFormVisible.value = false
-    fileList.value = [];
     formData.value = {
         id: '',
+        videoId: '',
         userId: '',
-        videoUrl: '',
-        videoType: '',
+        highlightStartTime: undefined,
+        highlightEndTime: undefined,
+        highlightType: '',
         createdAt: new Date(),
         updatedAt: new Date(),
         }
@@ -472,13 +365,13 @@ const enterDialog = async () => {
               let res
               switch (type.value) {
                 case 'create':
-                  res = await createVideos(formData.value)
+                  res = await createVideoHighlight(formData.value)
                   break
                 case 'update':
-                  res = await updateVideos(formData.value)
+                  res = await updateVideoHighlight(formData.value)
                   break
                 default:
-                  res = await createVideos(formData.value)
+                  res = await createVideoHighlight(formData.value)
                   break
               }
               if (res.code === 0) {
@@ -508,7 +401,7 @@ const openDetailShow = () => {
 // 打开详情
 const getDetails = async (row) => {
   // 打开弹窗
-  const res = await findVideos({ id: row.id })
+  const res = await findVideoHighlight({ id: row.id })
   if (res.code === 0) {
     detailFrom.value = res.data
     openDetailShow()
@@ -522,31 +415,9 @@ const closeDetailShow = () => {
   detailFrom.value = {}
 }
 
-// 添加播放高光片段方法
-const playHighlight = (highlight) => {
-  if (videoRef.value) {
-    videoRef.value.currentTime = highlight.highlightStartTime
-    videoRef.value.play()
-  }
-}
-
-// 关闭对话框时清理
-const closeMarkManagerDialog = () => {
-  markManagerDialogVisible.value = false
-  videoSrc.value = ""
-  currentVideo.value = null
-}
 
 </script>
 
 <style>
-.video-url-cell {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  line-height: 1.2;
-  max-height: 3.6em;
-}
+
 </style>

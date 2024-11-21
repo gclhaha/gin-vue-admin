@@ -1,3 +1,6 @@
 package leep
 
-type ServiceGroup struct{ VideosService }
+type ServiceGroup struct {
+	VideosService
+	VideoHighlightService
+}
