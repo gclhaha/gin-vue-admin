@@ -21,7 +21,7 @@ func (s *VideosRouter) InitVideosRouter(Router *gin.RouterGroup, PublicRouter *g
 	{
 		videosRouterWithoutRecord.GET("findVideos", videosApi.FindVideos)
 		videosRouterWithoutRecord.GET("getVideosList", videosApi.GetVideosList)
-		videosRouter.GET("loadVideo", videosApi.LoadVideo)
+		videosRouterWithoutRecord.GET("loadVideo", videosApi.LoadVideo)
 	}
 	{
 		videosRouterWithoutAuth.GET("getVideosPublic", videosApi.GetVideosPublic)

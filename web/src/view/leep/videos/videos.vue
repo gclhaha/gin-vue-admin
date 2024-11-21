@@ -33,7 +33,7 @@
         
           <el-table-column align="left" label="视频ID" prop="id" width="120" v-if="false" />
           <el-table-column align="left" label="用户ID" prop="userId" width="120" />
-          <el-table-column align="left" label="视频路径" prop="videoUrl" min-width="300">
+          <el-table-column align="left" label="视频名称" prop="videoUrl" min-width="300">
             <template #default="scope">
               <el-tooltip
                 class="box-item"
@@ -41,7 +41,7 @@
                 :content="scope.row.videoUrl"
                 placement="top-start"
               >
-                <div class="video-url-cell">{{ scope.row.videoUrl }}</div>
+                <div class="video-url-cell">{{ getVideoName(scope.row.videoUrl) }}</div>
               </el-tooltip>
             </template>
           </el-table-column>
@@ -57,7 +57,7 @@
               <el-button  type="primary" link class="table-button" @click="getDetails(scope.row)"><el-icon style="margin-right: 5px"><InfoFilled /></el-icon>查看详情</el-button>
               <el-button  type="primary" link icon="edit" class="table-button" @click="updateVideosFunc(scope.row)">变更</el-button>
               <el-button  type="primary" link icon="delete" @click="deleteRow(scope.row)">删除</el-button>
-              <el-button  type="primary" style="margin-left: 10px;" @click="openMarkManagerDialog(scope.row)">标记管理</el-button>
+              <el-button  type="primary" style="margin-left: 10px;" @click="openMarkManagerDialog(scope.row)">高光管理</el-button>
             </template>
         </el-table-column>
         </el-table>
@@ -328,7 +328,7 @@ const onSubmit = () => {
   })
 }
 
-// ���页
+// �����页
 const handleSizeChange = (val) => {
   pageSize.value = val
   getTableData()
@@ -535,6 +535,12 @@ const closeMarkManagerDialog = () => {
   markManagerDialogVisible.value = false
   videoSrc.value = ""
   currentVideo.value = null
+}
+
+const getVideoName = (url) => {
+  if (!url) return ''
+  // 移除开头的 /temp/ 并返回文件名
+  return url.replace(/^\/temp\//, '')
 }
 
 </script>
