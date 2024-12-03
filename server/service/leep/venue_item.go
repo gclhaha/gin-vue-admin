@@ -10,35 +10,35 @@ type VenueItemService struct {}
 // CreateVenueItem 创建场馆场地记录
 // Author [yourname](https://github.com/yourname)
 func (venueItemService *VenueItemService) CreateVenueItem(venueItem *leep.VenueItem) (err error) {
-	err = global.GVA_DB.Create(venueItem).Error
+	err = global.MustGetGlobalDBByDBName("leep").Create(venueItem).Error
 	return err
 }
 
 // DeleteVenueItem 删除场馆场地记录
 // Author [yourname](https://github.com/yourname)
 func (venueItemService *VenueItemService)DeleteVenueItem(id string) (err error) {
-	err = global.GVA_DB.Delete(&leep.VenueItem{},"id = ?",id).Error
+	err = global.MustGetGlobalDBByDBName("leep").Delete(&leep.VenueItem{},"id = ?",id).Error
 	return err
 }
 
 // DeleteVenueItemByIds 批量删除场馆场地记录
 // Author [yourname](https://github.com/yourname)
 func (venueItemService *VenueItemService)DeleteVenueItemByIds(ids []string) (err error) {
-	err = global.GVA_DB.Delete(&[]leep.VenueItem{},"id in ?",ids).Error
+	err = global.MustGetGlobalDBByDBName("leep").Delete(&[]leep.VenueItem{},"id in ?",ids).Error
 	return err
 }
 
 // UpdateVenueItem 更新场馆场地记录
 // Author [yourname](https://github.com/yourname)
 func (venueItemService *VenueItemService)UpdateVenueItem(venueItem leep.VenueItem) (err error) {
-	err = global.GVA_DB.Model(&leep.VenueItem{}).Where("id = ?",venueItem.Id).Updates(&venueItem).Error
+	err = global.MustGetGlobalDBByDBName("leep").Model(&leep.VenueItem{}).Where("id = ?",venueItem.Id).Updates(&venueItem).Error
 	return err
 }
 
 // GetVenueItem 根据id获取场馆场地记录
 // Author [yourname](https://github.com/yourname)
 func (venueItemService *VenueItemService)GetVenueItem(id string) (venueItem leep.VenueItem, err error) {
-	err = global.GVA_DB.Where("id = ?", id).First(&venueItem).Error
+	err = global.MustGetGlobalDBByDBName("leep").Where("id = ?", id).First(&venueItem).Error
 	return
 }
 
@@ -48,7 +48,7 @@ func (venueItemService *VenueItemService)GetVenueItemInfoList(info leepReq.Venue
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
     // 创建db
-	db := global.GVA_DB.Model(&leep.VenueItem{})
+	db := global.MustGetGlobalDBByDBName("leep").Model(&leep.VenueItem{})
     var venueItems []leep.VenueItem
     // 如果有条件搜索 下方会自动创建搜索语句
 	err = db.Count(&total).Error

@@ -7,11 +7,11 @@ import (
 
 func bizModel() error {
 	db := global.GVA_DB
-	err := db.AutoMigrate(leep.Venue{}, leep.VenueItem{})
+	err := db.AutoMigrate()
 	if err != nil {
 		return err
 	}
 	leepDb := global.GetGlobalDBByDBName("leep")
-	leepDb.AutoMigrate(leep.Videos{})
+	leepDb.AutoMigrate(leep.Videos{}, leep.Venue{}, leep.VenueItem{})
 	return nil
 }

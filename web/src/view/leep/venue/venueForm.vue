@@ -56,7 +56,6 @@ const router = useRouter()
 
 const type = ref('')
 const formData = ref({
-            id: '',
             thumbnailUrl: '',
             name: '',
             province: '',

@@ -97,9 +97,6 @@
 
     <el-drawer destroy-on-close size="800" v-model="detailShow" :show-close="true" :before-close="closeDetailShow">
             <el-descriptions :column="1" border>
-                    <el-descriptions-item label="场馆ID，使用UUID">
-                        {{ detailFrom.id }}
-                    </el-descriptions-item>
                     <el-descriptions-item label="缩略图URL">
                         {{ detailFrom.thumbnailUrl }}
                     </el-descriptions-item>
@@ -154,7 +151,6 @@ const showAllQuery = ref(false)
 
 // 自动化生成的字典（可能为空）以及字段
 const formData = ref({
-            id: '',
             thumbnailUrl: '',
             name: '',
             province: '',
@@ -340,7 +336,6 @@ const openDialog = () => {
 const closeDialog = () => {
     dialogFormVisible.value = false
     formData.value = {
-        id: '',
         thumbnailUrl: '',
         name: '',
         province: '',

@@ -1,4 +1,3 @@
-
 <template>
   <div>
     <div class="gva-search-box">
@@ -67,8 +66,15 @@
             </template>
 
           <el-form :model="formData" label-position="top" ref="elFormRef" :rules="rule" label-width="80px">
-            <el-form-item label="所属场馆ID:"  prop="venueId" >
-              <el-input v-model="formData.venueId" :clearable="true"  placeholder="请输入所属场馆ID" />
+            <el-form-item label="所属场馆:" prop="venueId">
+              <el-select v-model="formData.venueId" placeholder="请选择所属场馆" style="width: 100%" value-key="id">
+                <el-option
+                  v-for="item in venueOptions"
+                  :key="item.id"
+                  :label="item.name"
+                  :value="item.id"
+                />
+              </el-select>
             </el-form-item>
             <el-form-item label="缩略图URL:"  prop="thumbnailUrl" >
               <el-input v-model="formData.thumbnailUrl" :clearable="true"  placeholder="请输入缩略图URL" />
@@ -105,6 +111,7 @@ import {
   findVenueItem,
   getVenueItemList
 } from '@/api/leep/venueItem'
+import { getVenueList } from '@/api/leep/venue'  // 添加这行导入
 
 // 全量引入格式化工具 请按需保留
 import { getDictFunc, formatDate, formatBoolean, filterDict ,filterDataSource, returnArrImg, onDownloadFile } from '@/utils/format'
@@ -375,8 +382,21 @@ const getDetails = async (row) => {
 const closeDetailShow = () => {
   detailShow.value = false
   detailFrom.value = {}
+
 }
 
+const venueOptions = ref([])  // 添加场馆选项数据
+
+// 获取场馆列表
+const getVenues = async () => {
+  const res = await getVenueList({ page: 1, pageSize: 999 })  // 获取所有场馆
+  if (res.code === 0) {
+    console.log(res.data.list)
+    venueOptions.value = res.data.list
+  }
+}
+
+getVenues()
 
 </script>
 
