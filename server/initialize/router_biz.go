@@ -15,7 +15,9 @@ func initBizRouter(routers ...*gin.RouterGroup) {
 	holder(publicGroup, privateGroup)
 	{
 		leepRouter := router.RouterGroupApp.Leep
-		leepRouter.InitVideosRouter(privateGroup, publicGroup) // 占位方法，保证文件可以正确加载，避免go空变量检测报错，请勿删除。
+		leepRouter.InitVideosRouter(privateGroup, publicGroup)
 		leepRouter.InitVideoHighlightRouter(privateGroup, publicGroup)
+		leepRouter.InitVenueRouter(privateGroup, publicGroup) // 占位方法，保证文件可以正确加载，避免go空变量检测报错，请勿删除。
+		leepRouter.InitVenueItemRouter(privateGroup, publicGroup)
 	}
 }
