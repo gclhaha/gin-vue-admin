@@ -32,6 +32,7 @@
         <el-table-column type="selection" width="55" />
         
           <el-table-column align="left" label="所属场馆ID" prop="venueId" width="120" />
+          <el-table-column align="left" label="所属场馆名称" prop="venueName" width="120" />
           <el-table-column align="left" label="缩略图URL" prop="thumbnailUrl" width="120" />
           <el-table-column align="left" label="场地名称" prop="name" width="120" />
         <el-table-column align="left" label="操作" fixed="right" min-width="240">

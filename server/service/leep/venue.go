@@ -63,6 +63,13 @@ func (venueService *VenueService)GetVenueInfoList(info leepReq.VenueSearch) (lis
 	err = db.Find(&venues).Error
 	return  venues, total, err
 }
+
+// GetVenueInfoByIds 根据ids获取场馆记录
+func (venueService *VenueService)GetVenueInfoByIds(ids []string) (venues []leep.Venue, err error) {
+	err = global.MustGetGlobalDBByDBName("leep").Where("id in ?", ids).Find(&venues).Error
+	return
+}
+
 func (venueService *VenueService)GetVenuePublic() {
     // 此方法为获取数据源定义的数据
     // 请自行实现
